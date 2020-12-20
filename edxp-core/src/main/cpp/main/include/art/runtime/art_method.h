@@ -37,9 +37,10 @@ namespace art {
 
         CREATE_HOOK_STUB_ENTRIES(void *, GetOatQuickMethodHeader, void *thiz, uintptr_t pc) {
             // This is a partial copy from AOSP. We only touch them if they are hooked.
+            // LOGD("GetOatQuickMethodHeader called, thiz=%p", thiz);
             if (UNLIKELY(edxp::isHooked(thiz))) {
                 uintptr_t original_ep = reinterpret_cast<uintptr_t>(
-                        getOriginalEntryPointFromTargetMethod(thiz));
+                        getOriginalEntryPointFromTargetMethod(thiz)) & ~0x1;
                 if (original_ep) {
                     char *code_length_loc =
                             reinterpret_cast<char *>(original_ep) + oat_header_code_length_offset;
@@ -85,12 +86,12 @@ namespace art {
             }
             if constexpr (edxp::is64) {
                 HOOK_FUNC(GetOatQuickMethodHeader, "_ZN3art9ArtMethod23GetOatQuickMethodHeaderEm");
+                HOOK_FUNC(ToDexPc, "_ZNK3art20OatQuickMethodHeader7ToDexPcEPPNS_9ArtMethodEmb");
             } else {
                 HOOK_FUNC(GetOatQuickMethodHeader, "_ZN3art9ArtMethod23GetOatQuickMethodHeaderEj");
+                HOOK_FUNC(ToDexPc, "_ZNK3art20OatQuickMethodHeader7ToDexPcEPPNS_9ArtMethodEjb");
             }
-
             RETRIEVE_FUNC_SYMBOL(PrettyMethod, "_ZN3art9ArtMethod12PrettyMethodEb");
-            HOOK_FUNC(ToDexPc, "_ZNK3art20OatQuickMethodHeader7ToDexPcEPPNS_9ArtMethodEjb");
         }
     }
 }
